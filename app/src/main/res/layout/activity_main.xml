@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        tools:context=".MainActivity">
+
+        <EditText
+            android:id="@+id/editTextPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter phone number"/>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:rowCount="4"
+            android:layout_gravity="center">
+
+            <!-- Row 1 -->
+            <Button
+               android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="5dp"
+                android:id="@+id/btn1"
+                style="@style/DialPadButton"
+                android:text="1"/>
+
+            <Button
+                android:id="@+id/btn2"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="2"/>
+
+            <Button
+                android:id="@+id/btn3"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="3"/>
+
+            <!-- Row 2 -->
+            <Button
+                android:id="@+id/btn4"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="4"/>
+
+            <Button
+                android:id="@+id/btn5"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="5"/>
+
+            <Button
+                android:id="@+id/btn6"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="6"/>
+
+            <!-- Row 3 -->
+            <Button
+                android:id="@+id/btn7"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="7"/>
+
+            <Button
+                android:id="@+id/btn8"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="8"/>
+
+            <Button
+                android:id="@+id/btn9"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="9"/>
+
+            <!-- Row 4 -->
+            <Button
+                android:id="@+id/btnStar"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="*"/>
+
+            <Button
+                android:id="@+id/btn0"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="0"/>
+
+            <Button
+                android:id="@+id/btnHash"
+                android:layout_margin="5dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                style="@style/DialPadButton"
+                android:text="#"/>
+        </GridLayout>
+
+        <Button
+            android:id="@+id/buttonMakeCall"
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Make Call"/>
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
