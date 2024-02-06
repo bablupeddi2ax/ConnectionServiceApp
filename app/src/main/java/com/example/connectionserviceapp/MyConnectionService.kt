@@ -1,5 +1,6 @@
 package com.example.connectionserviceapp
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Build
 import android.telecom.Connection
 import android.telecom.ConnectionRequest
@@ -7,6 +8,7 @@ import android.telecom.ConnectionService
 import android.telecom.DisconnectCause
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -17,6 +19,7 @@ class MyConnectionService : ConnectionService() {
         phoneAccount: PhoneAccountHandle?,
         connectionRequest: ConnectionRequest?
     ): Connection {
+       Log.i("CallCOnnnectionService","Inside")
         // Implement the creation of outgoing connections
         val myConnection = MyConnection(applicationContext)
         myConnection.connectionProperties = Connection.PROPERTY_SELF_MANAGED
@@ -35,6 +38,9 @@ class MyConnectionService : ConnectionService() {
 //        myConnection.setCallerName("name")
         myConnection.setVideoStateFromRequest(connectionRequest!!)
         myConnection.setCallOnHold()
+        // Trigger the notification for an incoming call
+        val inCallServiceIntent = Intent(applicationContext, MyInCallService::class.java)
+        applicationContext.startService(inCallServiceIntent)
         return myConnection
     }
     // telecom subsystem calls this method when app calls the placeCall(Uri,Bundle) in response of new incoing callapp return new instance of Connection implmentation

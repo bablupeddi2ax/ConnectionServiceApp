@@ -260,3 +260,35 @@ private var isIncomingCall = false
 //
 //        val telecomManager: TelecomManager = getSystemService(TelecomManager::class.java)
 //        telecomManager.registerPhoneAccount(phoneAccount)
+
+
+
+
+//val phoneAccountHandle = PhoneAccountHandle(
+//    ComponentName(this@MainActivity, MyConnectionService::class.java),
+//    "ADMIN"
+//)
+//if (!telecomManager.isIncomingCallPermitted(phoneAccountHandle)) {
+//    val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
+//    intent.putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
+//    startActivity(intent)
+//}
+//val uri = Uri.fromParts("tel", "+91 88579 77254", null)
+//val extras = Bundle()*/
+
+
+
+
+/**/
+/*/*  makeCallButton.setOnClickListener {
+            val phoneNumber = phoneNumberEditText.text.toString().trim()
+            if (phoneNumber.isNotEmpty()) {
+                makeCall(phoneNumber)
+            } else {
+                Toast.makeText(this, "Enter a valid phone number", Toast.LENGTH_SHORT).show()
+            }
+        }*/
+
+
+/*        // Use the correct phoneAccountHandle based on your implementation
+      */

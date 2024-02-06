@@ -4,55 +4,95 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioDescriptor
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.media.AudioProfile
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.telecom.Call
+import android.telecom.CallAudioState
+import android.telecom.DisconnectCause
 import android.telecom.InCallService
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.content.getSystemService
 
 class MyInCallService : InCallService() {
-
+private var currentCall:Call? = null
+    private var notificationManager:NotificationManager? = null
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCallAdded(call: Call) {
         super.onCallAdded(call)
-
+        currentCall = call
+        notificationManager = getSystemService(NotificationManager::class.java) as NotificationManager
+        Log.i("MyIncoming", "inside onCallAdded")
         // Handle the incoming call and show the notification
+
         showIncomingCallNotification(call)
+        Log.i("MyIncoming", "inside onCallAdded")
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun showIncomingCallNotification(call: Call) {
         val YOUR_CHANNEL_ID = "Your_Channel_Id"
         val YOUR_TAG = "Your_Tag"
         val YOUR_ID = 1
 
         // Create an intent which triggers your fullscreen incoming call user interface.
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, InCallActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        val pendingIntent = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        // Build the notification as an ongoing high priority item; this ensures it will show as
-        // a heads-up notification which slides down over top of the current content.
-        val builder = Notification.Builder(this)
-        builder.setOngoing(true)
-        builder.setPriority(Notification.PRIORITY_HIGH)
+        intent.putExtra("",call.details.contactDisplayName)
+        if(currentCall != null) {
+            intent.putExtra("displayName", currentCall?.details?.contactDisplayName?.toString())
+            intent.putExtra("callName", currentCall?.details?.callerDisplayName.toString())
+            //intent.putExtra("callObject", currentCall) // Pass the Call o
 
-        // Set notification content intent to take the user to the fullscreen UI if the user taps on the
-        // notification body.
-        builder.setContentIntent(pendingIntent)
-        // Set full screen intent to trigger the display of the fullscreen UI when the notification
+        val acceptIntent = Intent(this, MyInCallService::class.java)
+        acceptIntent.action = "AcceptCall"
+        val rejectIntent = Intent(this, MyInCallService::class.java)
+        rejectIntent.action = "RejectCall"
+
+        val pendingIntentAccept = PendingIntent.getService(this, 1, acceptIntent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntentReject = PendingIntent.getService(this, 2, rejectIntent, PendingIntent.FLAG_IMMUTABLE)
+        // Build the notification as an ongoing high priority item.
+        val builder: NotificationCompat.Builder
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = NotificationCompat.Builder(this, YOUR_CHANNEL_ID)
+        } else {
+            builder = NotificationCompat.Builder(this)
+        }
+
+        builder.setSmallIcon(R.drawable.ic_launcher_background)
+        builder.setContentTitle(call.details.callerDisplayName)
+        builder.setContentText(call.details.accountHandle.id)
+        builder.setExtras(call.details.extras)
+        builder.setAutoCancel(false)
+        builder.setContentIntent(PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_IMMUTABLE))
+
+        // Set full-screen intent to trigger display of the fullscreen UI when the notification
         // manager deems it appropriate.
-        builder.setFullScreenIntent(pendingIntent, true)
+        builder.addAction(androidx.core.R.drawable.notification_bg, "Accept", pendingIntentAccept)
+        builder.addAction(androidx.appcompat.R.drawable.abc_btn_switch_to_on_mtrl_00001, "Reject", pendingIntentReject)
 
         // Setup notification content.
-        builder.setSmallIcon(R.drawable.ic_launcher_background)
-        builder.setContentTitle("Your notification title")
-        builder.setContentText("Your notification content.")
+        builder.setSmallIcon(R.drawable.ic_launcher_background)  // Replace with your actual icon resource ID
+        builder.setContentTitle(call.details.callerDisplayName)
+        builder.setContentText(call.details.callDirection.toString())
 
-        // Use builder.addAction(..) to add buttons to answer or reject the call.
+        // Set notification as insistent to cause your ringtone to loop.
+        builder.priority = NotificationCompat.PRIORITY_HIGH
+        builder.setCategory(NotificationCompat.CATEGORY_CALL)
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -69,37 +109,91 @@ class MyInCallService : InCallService() {
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build()
             )
-            notificationManager.createNotificationChannel(channel)
+            notificationManager?.createNotificationChannel(channel)
+
         }
 
-        notificationManager.notify(YOUR_TAG, YOUR_ID, builder.build())
+        notificationManager?.notify(YOUR_TAG, YOUR_ID, builder.build())
     }
-}
-//val phoneAccountHandle = PhoneAccountHandle(
-//    ComponentName(this@MainActivity, MyConnectionService::class.java),
-//    "ADMIN"
-//)
-//if (!telecomManager.isIncomingCallPermitted(phoneAccountHandle)) {
-//    val intent = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
-//    intent.putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
-//    startActivity(intent)
-//}
-//val uri = Uri.fromParts("tel", "+91 88579 77254", null)
-//val extras = Bundle()*/
 
+   }
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun rejectCall(call: Call) {
+        call.reject(Call.REJECT_REASON_DECLINED)
+        notificationManager?.cancelAll()
+    }
+    @RequiresApi(Build.VERSION_CODES.R)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        when(intent?.action){
+            "AcceptCall"->{
+                currentCall?.let { setCallActive(it) }
+                val inCallActivityIntent = Intent(this,InCallActivity::class.java)
+                inCallActivityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                if(currentCall!=null) {
+                    intent.putExtra("displayName", currentCall?.details?.contactDisplayName?.toString())
+                    intent.putExtra("callName",currentCall?.details?.callerDisplayName.toString())
 
-
-/**/
-/*/*  makeCallButton.setOnClickListener {
-            val phoneNumber = phoneNumberEditText.text.toString().trim()
-            if (phoneNumber.isNotEmpty()) {
-                makeCall(phoneNumber)
-            } else {
-                Toast.makeText(this, "Enter a valid phone number", Toast.LENGTH_SHORT).show()
+                }
+                startActivity(inCallActivityIntent)
             }
-        }*/
+            "RejectCall"->{
+                currentCall?.let { rejectCall(it)
+                    notificationManager?.cancel(1)
+                }
+
+            }
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+    @RequiresApi(Build.VERSION_CODES.R)
+    override fun onCallRemoved(call: Call) {
+        super.onCallRemoved(call)
+
+        // Handle call removal as needed.
+    }
+    private fun setCallActive(call:Call){
+        call.answer(0)
+
+    }
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun hold(){
+        currentCall?.let {
+        if(it.details.state==Call.STATE_ACTIVE){
+           it.hold()
+        }
+        }
+    }
+    inner class MyBroadCastReceiver:BroadcastReceiver(){
+        @RequiresApi(Build.VERSION_CODES.S)
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.action){
+                "ACTION_SPEAKER_ON"->{
+                    val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                    audioManager.mode = AudioManager.MODE_IN_CALL
+// Get the AudioDeviceInfo object for the built-in speaker
+                    val speakerDevice = audioManager.availableCommunicationDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+                    }
+
+// Ensure the speaker device is found
+                    if (speakerDevice != null) {
+                        audioManager.setCommunicationDevice(speakerDevice)
+                    } else {
+                        // Handle the error, e.g., log a message or inform the user
+                    }
+//
+//                    audioManager.isSpeakerphoneOn = true
+
+                }
+                "ACTION_END"->{
+                    currentCall?.reject(Call.REJECT_REASON_DECLINED)
+                    notificationManager?.cancel(1)
+                }
+            }
+        }
+    }
 
 
-/*        // Use the correct phoneAccountHandle based on your implementation
-      */
+
+}

@@ -55,6 +55,27 @@ class MainActivity : AppCompatActivity() {
         btnCall.setOnClickListener{
            // make casll to repective phonwnumber for now it will be (90390589284) through whatever service or like  dont know exactly but chekcout services u have made o
         // r telecomnaznger or smthg to make cal
+            val telecomManger = getSystemService(TelecomManager::class.java)
+
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.CALL_PHONE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+            }
+
+            val callIntent = Intent(this@MainActivity,InCallActivity::class.java)
+
+            intent.putExtra("number","+919390589284")
+            startActivity(callIntent)
+
         }
         if (!checkNotificationPermission()) {
             requestPostNotificationPermission()
